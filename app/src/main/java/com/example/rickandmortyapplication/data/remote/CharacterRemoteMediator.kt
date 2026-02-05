@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.example.rickandmortyapplication.data.local.AppDatabase
 import com.example.rickandmortyapplication.data.local.entity.CharacterEntity
 import com.example.rickandmortyapplication.data.local.entity.RemoteKeysEntity
+import com.example.rickandmortyapplication.data.mapper.toCharacterEntity
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -58,19 +59,7 @@ class CharacterRemoteMediator(
                 }
                 database.remoteKeysDao().insertAll(remoteKeys)
 
-                val characters = response.results.map { dto ->
-                    CharacterEntity(
-                        id = dto.id,
-                        name = dto.name,
-                        status = dto.status,
-                        species = dto.species,
-                        type = dto.type,
-                        gender = dto.gender,
-                        originName = dto.origin.name,
-                        locationName = dto.location.name,
-                        image = dto.image
-                    )
-                }
+                val characters = response.results.map { it.toCharacterEntity() }
                 database.characterDao().insertAll(characters)
             }
 

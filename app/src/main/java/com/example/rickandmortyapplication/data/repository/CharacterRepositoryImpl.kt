@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.rickandmortyapplication.data.local.AppDatabase
+import com.example.rickandmortyapplication.data.mapper.toCharacter
 import com.example.rickandmortyapplication.data.remote.CharacterRemoteMediator
 import com.example.rickandmortyapplication.data.remote.RickAndMortyApi
 import com.example.rickandmortyapplication.domain.model.Character
@@ -26,15 +27,7 @@ class CharacterRepositoryImpl @Inject constructor(
             remoteMediator = CharacterRemoteMediator(database, api),
             pagingSourceFactory = { database.characterDao().getPagingSource() }
         ).flow.map { pagingData ->
-            pagingData.map { entity ->
-                Character(
-                    id = entity.id,
-                    name = entity.name,
-                    status = entity.status,
-                    species = entity.species,
-                    image = entity.image
-                )
-            }
+            pagingData.map { it.toCharacter() }
         }
     }
 }
