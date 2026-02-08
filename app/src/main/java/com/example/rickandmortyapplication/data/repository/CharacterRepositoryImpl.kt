@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.rickandmortyapplication.data.local.AppDatabase
 import com.example.rickandmortyapplication.data.mapper.toCharacter
+import com.example.rickandmortyapplication.data.mapper.toCharacterEntity
 import com.example.rickandmortyapplication.data.remote.CharacterRemoteMediator
 import com.example.rickandmortyapplication.data.remote.RickAndMortyApi
 import com.example.rickandmortyapplication.domain.model.Character
@@ -30,4 +31,11 @@ class CharacterRepositoryImpl @Inject constructor(
             pagingData.map { it.toCharacter() }
         }
     }
+
+    override suspend fun getCharacterById(id: Int): Character {
+        val dto = api.getCharacterById(id)
+        val entity = dto.toCharacterEntity()
+        return entity.toCharacter()
+    }
+
 }

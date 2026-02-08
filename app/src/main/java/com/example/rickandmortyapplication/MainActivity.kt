@@ -18,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.rickandmortyapplication.ui.characterdetail.CharacterDetailRoute
 import com.example.rickandmortyapplication.ui.characterlist.CharacterListRoute
 import com.example.rickandmortyapplication.ui.naviagtion.Screen
 import com.example.rickandmortyapplication.ui.theme.RickAndMortyTheme
@@ -48,10 +49,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable<Screen.CharacterDetail> { backStackEntry ->
-                            val args = backStackEntry.toRoute<Screen.CharacterDetail>()
-
-                            StubDetailScreen(id = args.id)
+                        composable<Screen.CharacterDetail> {
+                            CharacterDetailRoute(
+                                onBackClick = { navController.navigateUp() }
+                            )
                         }
                     }
                 }
