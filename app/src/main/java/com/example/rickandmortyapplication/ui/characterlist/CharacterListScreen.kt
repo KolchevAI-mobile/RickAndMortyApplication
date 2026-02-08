@@ -5,11 +5,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -42,6 +46,9 @@ fun CharacterListScreen(
     val loadState = characters.loadState
 
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val filters by viewModel.filters.collectAsState()
+
+    var isFilterSheetOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -57,6 +64,27 @@ fun CharacterListScreen(
             placeholder = { Text("Поиск по имени") },
             singleLine = true
         )
+
+        Button(
+            onClick = { isFilterSheetOpen = true },
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            Text("Фильтры")
+        }
+
+        if (isFilterSheetOpen) {
+            CharacterFilterBottomSheet(
+                currentFilters = filters,
+                onApply = { newFilters ->
+                    viewModel.onFilterChange(newFilters)
+                    isFilterSheetOpen = false
+                },
+                onDismiss = {
+                    isFilterSheetOpen = false
+                }
+            )
+        }
+
 
         when {
             loadState.refresh is LoadState.Loading -> {
