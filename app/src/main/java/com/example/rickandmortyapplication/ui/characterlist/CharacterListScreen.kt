@@ -1,10 +1,17 @@
 package com.example.rickandmortyapplication.ui.characterlist
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -34,24 +41,42 @@ fun CharacterListScreen(
     val characters = viewModel.characterPagingFlow.collectAsLazyPagingItems()
     val loadState = characters.loadState
 
-    when {
-        loadState.refresh is LoadState.Loading -> {
-            LoadingState()
-        }
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
-        loadState.refresh is LoadState.Error -> {
-            val error = loadState.refresh as LoadState.Error
-            ErrorState(
-                message = error.error.localizedMessage ?: "Не удалось загрузить персонажей",
-                onRetry = { characters.retry() }
-            )
-        }
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        TextField(
+            value = searchQuery,
+            onValueChange = { newValue ->
+                viewModel.onSearchQueryChange(newValue)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            placeholder = { Text("Поиск по имени") },
+            singleLine = true
+        )
 
-        else -> {
-            CharacterListContent(
-                characters = characters,
-                onCharacterClick = onCharacterClick
-            )
+        when {
+            loadState.refresh is LoadState.Loading -> {
+                LoadingState()
+            }
+
+            loadState.refresh is LoadState.Error -> {
+                val error = loadState.refresh as LoadState.Error
+                ErrorState(
+                    message = error.error.localizedMessage ?: "Не удалось загрузить персонажей",
+                    onRetry = { characters.retry() }
+                )
+            }
+
+            else -> {
+                CharacterListContent(
+                    characters = characters,
+                    onCharacterClick = onCharacterClick
+                )
+            }
         }
     }
 }
