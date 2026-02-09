@@ -1,7 +1,6 @@
 package com.example.rickandmortyapplication.domain.use_case
 
 import androidx.paging.PagingData
-import androidx.room.Query
 import com.example.rickandmortyapplication.domain.repository.CharacterRepository
 import com.example.rickandmortyapplication.domain.model.Character
 import com.example.rickandmortyapplication.domain.model.CharacterFilter
