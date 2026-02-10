@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +29,19 @@ class CharacterListViewModel @Inject constructor(
     val filters: StateFlow<CharacterFilter> = _filters
 
     val characterPagingFlow: Flow<PagingData<Character>> =
-        getCharactersUseCase("", CharacterFilter(null, null))
+        combine(
+            searchQuery,
+            filters
+        ) { query, filters ->
+            query to filters
+        }
+            .debounce(500)
+            .distinctUntilChanged()
+            .flatMapLatest { (query, filters) ->
+                getCharactersUseCase(query, filters)
+            }
             .cachedIn(viewModelScope)
+
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query

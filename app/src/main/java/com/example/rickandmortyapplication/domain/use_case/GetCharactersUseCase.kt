@@ -11,6 +11,6 @@ class GetCharactersUseCase @Inject constructor(
     private val repository: CharacterRepository
 ) {
     operator fun invoke(query: String, filters: CharacterFilter): Flow<PagingData<Character>> {
-        return repository.getAllCharacters()
+        return repository.getCharacters(query, filters)
     }
 }
