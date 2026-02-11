@@ -8,10 +8,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.rickandmortyapplication.ui.components.ErrorState
-import com.example.rickandmortyapplication.ui.components.LoadingState
 import com.example.rickandmortyapplication.ui.state.UiState
 import com.example.rickandmortyapplication.domain.model.Character
+import com.example.rickandmortyapplication.ui.components.ErrorWithAnimationState
+import com.example.rickandmortyapplication.ui.components.LoadingAnimation
 
 @Composable
 fun CharacterDetailRoute(
@@ -32,16 +32,33 @@ fun CharacterDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    when (val s = state) {
-        is UiState.Loading -> LoadingState()
-        is UiState.Error -> ErrorState(
-            message = s.message,
-            onRetry = { viewModel.loadCharacter() }
-        )
-        is UiState.Success -> CharacterDetailContent(
-            character = s.data,
-            onBackClick = onBackClick
-        )
+    var showLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(state) {
+        if (state is UiState.Loading) {
+            showLoading = true
+        } else {
+            kotlinx.coroutines.delay(1000)
+            showLoading = false
+        }
+    }
+
+    when {
+        showLoading -> LoadingAnimation()
+        state is UiState.Error -> {
+            val s = state as UiState.Error
+            ErrorWithAnimationState(
+                message = s.message,
+                onRetry = { viewModel.loadCharacter() }
+            )
+        }
+        state is UiState.Success -> {
+            val s = state as UiState.Success
+            CharacterDetailContent(
+                character = s.data,
+                onBackClick = onBackClick
+            )
+        }
     }
 }
 

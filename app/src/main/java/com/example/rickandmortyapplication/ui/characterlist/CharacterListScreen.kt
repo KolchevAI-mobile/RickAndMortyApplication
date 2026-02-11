@@ -29,8 +29,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.rickandmortyapplication.domain.model.Character
 import com.example.rickandmortyapplication.ui.components.CharacterCard
-import com.example.rickandmortyapplication.ui.components.ErrorState
-import com.example.rickandmortyapplication.ui.components.LoadingState
+import com.example.rickandmortyapplication.ui.components.ErrorWithAnimationState
+import com.example.rickandmortyapplication.ui.components.LoadingAnimation
 
 @Composable
 fun CharacterListRoute(
@@ -107,12 +107,12 @@ fun CharacterListScreen(
 
         when {
             loadState.refresh is LoadState.Loading -> {
-                LoadingState()
+                LoadingAnimation()
             }
 
             loadState.refresh is LoadState.Error -> {
                 val error = loadState.refresh as LoadState.Error
-                ErrorState(
+                ErrorWithAnimationState(
                     message = error.error.localizedMessage ?: "Не удалось загрузить персонажей",
                     onRetry = { characters.retry() }
                 )
