@@ -20,6 +20,16 @@ class CharacterDetailViewModel @Inject constructor(
     private val getCharacterById: GetCharacterByIdUseCase
 ) : ViewModel() {
 
+    constructor(
+        characterId: Int,
+        getCharacterById: GetCharacterByIdUseCase
+    ) : this(
+        savedStateHandle = SavedStateHandle(
+            mapOf("id" to characterId)
+        ),
+        getCharacterById = getCharacterById
+    )
+
     private val args = savedStateHandle.toRoute<Screen.CharacterDetail>()
     private val characterId: Int = args.id
 
