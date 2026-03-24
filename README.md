@@ -28,25 +28,8 @@
 - Room (локальное кеширование персонажей)
 
 ## Структура проекта
-app/
- ├─ data/
- │   ├─ local/        // Room: DAO, entity, AppDatabase
- │   ├─ remote/       // Retrofit API, DTO, RemoteMediator
- │   ├─ mapper/       // Мапперы DTO/Entity → Domain
- │   └─ repository/   // Реализация CharacterRepository
- │
- ├─ domain/
- │   ├─ model/        // Доменные модели (Character, CharacterFilter)
- │   ├─ repository/   // Интерфейсы репозиториев
- │   └─ use_case/     // Use case'ы (GetCharacters, GetCharacterById, ...)
- │
- ├─ ui/
- │   ├─ characterlist/   // Экран списка персонажей
- │   ├─ characterdetail/ // Экран деталки
- │   ├─ components/      // Общие UI‑компоненты (карточки, состояния, Lottie)
- │   └─ navigation/      // Навигация между экранами
- │
- └─ di/               // Hilt‑модули: Network, Database, Repository
+<img width="1032" height="766" alt="image" src="https://github.com/user-attachments/assets/028a0892-fd23-4f12-b894-59f7c4d15257" />
+
 
 ## Скриншоты и анимации
 ### Экран списка персонажей
