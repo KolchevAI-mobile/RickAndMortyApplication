@@ -1,4 +1,10 @@
 # Rick and Morty Application
+
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-purple.svg)](https://kotlinlang.org/)
+[![Compose](https://img.shields.io/badge/Jetpack-Compose-blue.svg)](https://developer.android.com/jetpack/compose)
+
+
 Небольшое учебное Android‑приложение для просмотра персонажей из Rick and Morty API.
 Проект сделан как тренажёр по современному Android‑стеку: Jetpack Compose, Paging 3, Hilt, Room, Retrofit, Coroutines, Lottie.
 
