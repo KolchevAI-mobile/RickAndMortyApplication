@@ -32,7 +32,7 @@ class CharacterRemoteMediator(
                 LoadType.APPEND -> {
                     val remoteKeys = getRemoteKeyForLastItem(state)
                     val nextKey = remoteKeys?.nextKey
-                        ?: return MediatorResult.Success(endOfPaginationReached = remoteKeys != null)
+                        ?: return MediatorResult.Success(endOfPaginationReached = true)
                     nextKey
                 }
             }

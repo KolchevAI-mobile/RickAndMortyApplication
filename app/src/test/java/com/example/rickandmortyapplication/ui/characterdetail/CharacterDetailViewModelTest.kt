@@ -14,9 +14,6 @@ import org.junit.Test
 class CharacterDetailViewModelTest {
 
     private class FakeSuccessRepository : CharacterRepository {
-        override fun getAllCharacters() =
-            throw UnsupportedOperationException()
-
         override suspend fun getCharacterById(id: Int): Character {
             return Character(
                 id = id,
@@ -34,9 +31,6 @@ class CharacterDetailViewModelTest {
     }
 
     private class FakeErrorRepository : CharacterRepository {
-        override fun getAllCharacters() =
-            throw UnsupportedOperationException()
-
         override suspend fun getCharacterById(id: Int): Character {
             throw RuntimeException("Network error")
         }

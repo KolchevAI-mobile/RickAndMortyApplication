@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.rickandmortyapplication.domain.model.Character
 import com.example.rickandmortyapplication.domain.use_case.GetCharacterByIdUseCase
-import com.example.rickandmortyapplication.ui.naviagtion.Screen
+import com.example.rickandmortyapplication.ui.navigation.Screen
 import com.example.rickandmortyapplication.ui.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

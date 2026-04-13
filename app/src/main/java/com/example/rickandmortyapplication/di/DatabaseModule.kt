@@ -24,7 +24,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "rick_and_morty_db"
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
 

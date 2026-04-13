@@ -20,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.rickandmortyapplication.R
 import com.example.rickandmortyapplication.domain.model.CharacterFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,45 +43,45 @@ fun CharacterFilterBottomSheet(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Статус")
+            Text(text = stringResource(R.string.status_label))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FilterOptionButton(
-                    label = "Все",
+                    label = stringResource(R.string.filter_all),
                     selected = localFilters.status == null,
                     onClick = { localFilters = localFilters.copy(status = null) }
                 )
                 FilterOptionButton(
-                    label = "Живой",
+                    label = stringResource(R.string.filter_alive),
                     selected = localFilters.status == "alive",
                     onClick = { localFilters = localFilters.copy(status = "alive") }
                 )
                 FilterOptionButton(
-                    label = "Мертвый",
+                    label = stringResource(R.string.filter_dead),
                     selected = localFilters.status == "dead",
                     onClick = { localFilters = localFilters.copy(status = "dead") }
                 )
             }
 
-            Text(text = "Пол")
+            Text(text = stringResource(R.string.gender_label))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FilterOptionButton(
-                    label = "Все",
+                    label = stringResource(R.string.filter_all),
                     selected = localFilters.gender == null,
                     onClick = { localFilters = localFilters.copy(gender = null) }
                 )
                 FilterOptionButton(
-                    label = "Мужской",
+                    label = stringResource(R.string.filter_male),
                     selected = localFilters.gender == "male",
                     onClick = { localFilters = localFilters.copy(gender = "male") }
                 )
                 FilterOptionButton(
-                    label = "Женский",
+                    label = stringResource(R.string.filter_female),
                     selected = localFilters.gender == "female",
                     onClick = { localFilters = localFilters.copy(gender = "female") }
                 )
@@ -92,11 +94,11 @@ fun CharacterFilterBottomSheet(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.cancel))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { onApply(localFilters) }) {
-                    Text("Применить")
+                    Text(stringResource(R.string.apply))
                 }
             }
         }

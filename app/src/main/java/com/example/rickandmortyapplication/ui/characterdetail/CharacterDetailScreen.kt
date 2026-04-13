@@ -1,17 +1,29 @@
 package com.example.rickandmortyapplication.ui.characterdetail
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.rickandmortyapplication.ui.state.UiState
+import com.example.rickandmortyapplication.R
 import com.example.rickandmortyapplication.domain.model.Character
 import com.example.rickandmortyapplication.ui.components.ErrorWithAnimationState
 import com.example.rickandmortyapplication.ui.components.LoadingAnimation
+import com.example.rickandmortyapplication.ui.state.UiState
 
 @Composable
 fun CharacterDetailRoute(
@@ -32,27 +44,16 @@ fun CharacterDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    var showLoading by remember { mutableStateOf(true) }
-
-    LaunchedEffect(state) {
-        if (state is UiState.Loading) {
-            showLoading = true
-        } else {
-            kotlinx.coroutines.delay(1000)
-            showLoading = false
-        }
-    }
-
-    when {
-        showLoading -> LoadingAnimation()
-        state is UiState.Error -> {
+    when (state) {
+        UiState.Loading -> LoadingAnimation()
+        is UiState.Error -> {
             val s = state as UiState.Error
             ErrorWithAnimationState(
                 message = s.message,
                 onRetry = { viewModel.loadCharacter() }
             )
         }
-        state is UiState.Success -> {
+        is UiState.Success -> {
             val s = state as UiState.Success
             CharacterDetailContent(
                 character = s.data,
@@ -74,7 +75,7 @@ fun CharacterDetailContent(
                 title = { Text(character.name) },
                 navigationIcon = {
                     TextButton(onClick = onBackClick) {
-                        Text("Назад")
+                        Text(stringResource(R.string.back))
                     }
                 }
             )
@@ -95,8 +96,8 @@ fun CharacterDetailContent(
                     .height(250.dp)
             )
 
-            Text(text = "Статус: ${character.status}")
-            Text(text = "Вид: ${character.species}")
+            Text(text = stringResource(R.string.character_status, character.status))
+            Text(text = stringResource(R.string.character_species, character.species))
         }
     }
 }

@@ -6,8 +6,6 @@ import com.example.rickandmortyapplication.domain.model.CharacterFilter
 import kotlinx.coroutines.flow.Flow
 
 interface CharacterRepository {
-    fun getAllCharacters(): Flow<PagingData<Character>>
-
     suspend fun getCharacterById(id: Int): Character
 
     fun getCharacters(

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.rickandmortyapplication.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -76,7 +79,7 @@ fun CharacterListScreen(
                 },
                 modifier = Modifier
                     .weight(1f),
-                placeholder = { Text("Поиск по имени") },
+                placeholder = { Text(stringResource(R.string.search_placeholder)) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp)
             )
@@ -86,7 +89,7 @@ fun CharacterListScreen(
             Button(
                 onClick = { isFilterSheetOpen = true }
             ) {
-                Text("Фильтры")
+                Text(stringResource(R.string.filters))
             }
         }
 
@@ -113,16 +116,28 @@ fun CharacterListScreen(
             loadState.refresh is LoadState.Error -> {
                 val error = loadState.refresh as LoadState.Error
                 ErrorWithAnimationState(
-                    message = error.error.localizedMessage ?: "Не удалось загрузить персонажей",
+                    message = error.error.localizedMessage
+                        ?: stringResource(R.string.load_characters_error),
                     onRetry = { characters.retry() }
                 )
             }
 
             else -> {
-                CharacterListContent(
-                    characters = characters,
-                    onCharacterClick = onCharacterClick
-                )
+                if (loadState.refresh is LoadState.NotLoading &&
+                    characters.itemCount == 0
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(stringResource(R.string.search_empty))
+                    }
+                } else {
+                    CharacterListContent(
+                        characters = characters,
+                        onCharacterClick = onCharacterClick
+                    )
+                }
             }
         }
     }
