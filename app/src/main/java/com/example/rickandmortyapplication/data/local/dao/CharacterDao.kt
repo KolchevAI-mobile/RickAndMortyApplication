@@ -18,4 +18,7 @@ interface CharacterDao {
 
     @Query("SELECT * FROM characters")
     fun getPagingSource(): PagingSource<Int, CharacterEntity>
+
+    @Query("SELECT * FROM characters WHERE id = :id")
+    suspend fun getById(id: Int): CharacterEntity?
 }

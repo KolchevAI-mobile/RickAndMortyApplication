@@ -44,19 +44,17 @@ fun CharacterDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    when (state) {
+    when (val st = state) {
         UiState.Loading -> LoadingAnimation()
         is UiState.Error -> {
-            val s = state as UiState.Error
             ErrorWithAnimationState(
-                message = s.message,
+                message = getCharacterErrorString(st.error),
                 onRetry = { viewModel.loadCharacter() }
             )
         }
         is UiState.Success -> {
-            val s = state as UiState.Success
             CharacterDetailContent(
-                character = s.data,
+                character = st.data,
                 onBackClick = onBackClick
             )
         }

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.rickandmortyapplication.domain.GetCharacterByIdResult
 import com.example.rickandmortyapplication.domain.model.Character
 import com.example.rickandmortyapplication.domain.use_case.GetCharacterByIdUseCase
 import com.example.rickandmortyapplication.ui.navigation.Screen
@@ -20,16 +21,6 @@ class CharacterDetailViewModel @Inject constructor(
     private val getCharacterById: GetCharacterByIdUseCase
 ) : ViewModel() {
 
-    constructor(
-        characterId: Int,
-        getCharacterById: GetCharacterByIdUseCase
-    ) : this(
-        savedStateHandle = SavedStateHandle(
-            mapOf("id" to characterId)
-        ),
-        getCharacterById = getCharacterById
-    )
-
     private val args = savedStateHandle.toRoute<Screen.CharacterDetail>()
     private val characterId: Int = args.id
 
@@ -43,13 +34,13 @@ class CharacterDetailViewModel @Inject constructor(
     fun loadCharacter() {
         viewModelScope.launch {
             _state.value = UiState.Loading
-            try {
-                val character: Character = getCharacterById(characterId)
-                _state.value = UiState.Success(character)
-            } catch (e: Exception) {
-                _state.value = UiState.Error(
-                    e.localizedMessage ?: "Не удалось загрузить персонажа"
-                )
+            when (val result = getCharacterById(characterId)) {
+                is GetCharacterByIdResult.Success -> {
+                    _state.value = UiState.Success(result.character)
+                }
+                is GetCharacterByIdResult.Failure -> {
+                    _state.value = UiState.Error(result.error)
+                }
             }
         }
     }

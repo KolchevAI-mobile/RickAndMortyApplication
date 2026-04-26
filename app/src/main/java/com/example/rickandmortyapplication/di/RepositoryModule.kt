@@ -1,5 +1,6 @@
 package com.example.rickandmortyapplication.di
 
+import com.example.rickandmortyapplication.data.repository.CharacterPagingDataSource
 import com.example.rickandmortyapplication.data.repository.CharacterRepositoryImpl
 import com.example.rickandmortyapplication.domain.repository.CharacterRepository
 import dagger.Binds
@@ -17,5 +18,11 @@ abstract class RepositoryModule {
     abstract fun bindCharacterRepository(
         characterRepositoryImpl: CharacterRepositoryImpl
     ): CharacterRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCharacterPagingDataSource(
+        characterRepositoryImpl: CharacterRepositoryImpl
+    ): CharacterPagingDataSource
 
 }

@@ -14,6 +14,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.rickandmortyapplication.R
 import com.example.rickandmortyapplication.domain.model.CharacterFilter
+import com.example.rickandmortyapplication.domain.model.CharacterGenderFilter
+import com.example.rickandmortyapplication.domain.model.CharacterStatusFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +36,10 @@ fun CharacterFilterBottomSheet(
     onDismiss: () -> Unit
 ) {
     var localFilters by remember { mutableStateOf(currentFilters) }
+
+    LaunchedEffect(currentFilters) {
+        localFilters = currentFilters
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss
@@ -55,13 +62,13 @@ fun CharacterFilterBottomSheet(
                 )
                 FilterOptionButton(
                     label = stringResource(R.string.filter_alive),
-                    selected = localFilters.status == "alive",
-                    onClick = { localFilters = localFilters.copy(status = "alive") }
+                    selected = localFilters.status == CharacterStatusFilter.ALIVE,
+                    onClick = { localFilters = localFilters.copy(status = CharacterStatusFilter.ALIVE) }
                 )
                 FilterOptionButton(
                     label = stringResource(R.string.filter_dead),
-                    selected = localFilters.status == "dead",
-                    onClick = { localFilters = localFilters.copy(status = "dead") }
+                    selected = localFilters.status == CharacterStatusFilter.DEAD,
+                    onClick = { localFilters = localFilters.copy(status = CharacterStatusFilter.DEAD) }
                 )
             }
 
@@ -77,13 +84,13 @@ fun CharacterFilterBottomSheet(
                 )
                 FilterOptionButton(
                     label = stringResource(R.string.filter_male),
-                    selected = localFilters.gender == "male",
-                    onClick = { localFilters = localFilters.copy(gender = "male") }
+                    selected = localFilters.gender == CharacterGenderFilter.MALE,
+                    onClick = { localFilters = localFilters.copy(gender = CharacterGenderFilter.MALE) }
                 )
                 FilterOptionButton(
                     label = stringResource(R.string.filter_female),
-                    selected = localFilters.gender == "female",
-                    onClick = { localFilters = localFilters.copy(gender = "female") }
+                    selected = localFilters.gender == CharacterGenderFilter.FEMALE,
+                    onClick = { localFilters = localFilters.copy(gender = CharacterGenderFilter.FEMALE) }
                 )
             }
 

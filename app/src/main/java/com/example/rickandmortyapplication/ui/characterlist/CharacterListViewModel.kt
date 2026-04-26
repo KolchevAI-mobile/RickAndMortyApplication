@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.paging.PagingData
 import com.example.rickandmortyapplication.domain.model.Character
 import com.example.rickandmortyapplication.domain.model.CharacterFilter
-import com.example.rickandmortyapplication.domain.use_case.GetCharactersUseCase
+import com.example.rickandmortyapplication.application.CharacterListPagerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class CharacterListViewModel @Inject constructor(
-    private val getCharactersUseCase: GetCharactersUseCase
+    private val characterListPagerUseCase: CharacterListPagerUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -41,7 +41,7 @@ class CharacterListViewModel @Inject constructor(
             .debounce(500)
             .distinctUntilChanged()
             .flatMapLatest { (query, filters) ->
-                getCharactersUseCase(query, filters)
+                characterListPagerUseCase(query, filters)
             }
             .cachedIn(viewModelScope)
 
