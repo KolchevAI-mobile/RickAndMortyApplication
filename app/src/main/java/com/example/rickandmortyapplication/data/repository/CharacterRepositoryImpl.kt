@@ -32,7 +32,12 @@ class CharacterRepositoryImpl @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     override fun observeCachedLocalWithRemote(): Flow<PagingData<Character>> {
         return Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 40,
+                prefetchDistance = 15,
+                enablePlaceholders = false
+            ),
             remoteMediator = CharacterRemoteMediator(database, api),
             pagingSourceFactory = { database.characterDao().getPagingSource() }
         ).flow.map { pagingData ->
@@ -46,7 +51,12 @@ class CharacterRepositoryImpl @Inject constructor(
     ): Flow<PagingData<Character>> {
         val apiFilter = filters.toApiQuery()
         return Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 40,
+                prefetchDistance = 15,
+                enablePlaceholders = false
+            ),
             pagingSourceFactory = {
                 NetworkCharacterPagingSource(api, query, apiFilter)
             }

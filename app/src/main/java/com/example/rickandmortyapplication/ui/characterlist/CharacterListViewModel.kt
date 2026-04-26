@@ -38,7 +38,7 @@ class CharacterListViewModel @Inject constructor(
         ) { query, filters ->
             query to filters
         }
-            .debounce(500)
+            .debounce(280)
             .distinctUntilChanged()
             .flatMapLatest { (query, filters) ->
                 characterListPagerUseCase(query, filters)

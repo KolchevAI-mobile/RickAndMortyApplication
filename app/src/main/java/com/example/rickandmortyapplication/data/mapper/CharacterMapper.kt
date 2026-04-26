@@ -25,6 +25,10 @@ fun CharacterEntity.toCharacter(): Character {
         name = name,
         status = status,
         species = species,
-        image = image
+        image = image,
+        type = type,
+        gender = gender,
+        originName = originName,
+        locationName = locationName
     )
 }

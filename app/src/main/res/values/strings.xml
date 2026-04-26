@@ -20,4 +20,13 @@
     <string name="retry">Повторить</string>
     <string name="character_status">Статус: %1$s</string>
     <string name="character_species">Вид: %1$s</string>
+    <string name="character_type">Тип: %1$s</string>
+    <string name="character_gender">Пол: %1$s</string>
+    <string name="character_origin">Происхождение: %1$s</string>
+    <string name="character_location">Локация: %1$s</string>
+    <string name="list_header_tagline">Мультивселенная</string>
+    <string name="list_header_title">Персонажи</string>
+    <string name="list_subtitle">Поиск в разломе измерений</string>
+    <string name="empty_portal">Пустой сектор. Поменяйте запрос или сбросьте фильтры.</string>
+    <string name="filter_sheet_title">Фильтр измерения</string>
 </resources>
