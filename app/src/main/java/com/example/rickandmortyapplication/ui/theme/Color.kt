@@ -4,23 +4,23 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 // Portal & brand
-val PortalGreen = Color(0xFF00FFAA)
-val RmGreen = Color(0xFF97CE4C)
-val NeonCyan = Color(0xFF4ECDC4)
-val PlasmaPink = Color(0xFFFF6B9D)
-val RmYellow = Color(0xFFFFE66D)
+val PortalGreen = Color(0xFF79A8FF)
+val RmGreen = Color(0xFF9DC183)
+val NeonCyan = Color(0xFF7CB7FF)
+val PlasmaPink = Color(0xFFBE8BFF)
+val RmYellow = Color(0xFFE6D496)
 
 // Surfaces
-val VoidBackground = Color(0xFF0A0C10)
-val VoidBackgroundMid = Color(0xFF12151C)
-val SurfaceCard = Color(0xFF1A1F2E)
-val SurfaceCardElevated = Color(0xFF232A3A)
-val SurfaceOutline = Color(0xFF3D4A5C)
+val VoidBackground = Color(0xFF0E1219)
+val VoidBackgroundMid = Color(0xFF161C27)
+val SurfaceCard = Color(0xFF1D2431)
+val SurfaceCardElevated = Color(0xFF252F3F)
+val SurfaceOutline = Color(0xFF4A586E)
 
 // Text
-val TextPrimary = Color(0xFFF0F4FC)
-val TextSecondary = Color(0xFF9AA5B8)
-val TextMuted = Color(0xFF5C6778)
+val TextPrimary = Color(0xFFEFF3FA)
+val TextSecondary = Color(0xFFAAB5C6)
+val TextMuted = Color(0xFF707E92)
 
 // Status (episode tones)
 val StatusAlive = Color(0xFF4ADE80)
@@ -44,9 +44,9 @@ val PortalEdgeGradient: Brush
 val ScreenBackgroundGradient: Brush
     get() = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0D1118),
+            Color(0xFF101625),
             VoidBackground,
-            Color(0xFF15192A),
-            Color(0xFF0A1620)
+            Color(0xFF1A2232),
+            Color(0xFF121A28)
         )
     )

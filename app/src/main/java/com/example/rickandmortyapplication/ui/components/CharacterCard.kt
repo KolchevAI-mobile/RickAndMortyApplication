@@ -3,7 +3,6 @@ package com.example.rickandmortyapplication.ui.components
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -16,9 +15,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -29,17 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.rickandmortyapplication.ui.theme.CardImageShape
-import com.example.rickandmortyapplication.ui.theme.PortalEdgeGradient
-import com.example.rickandmortyapplication.ui.theme.PortalGreen
-import com.example.rickandmortyapplication.ui.theme.SurfaceCard
-import com.example.rickandmortyapplication.ui.theme.TextPrimary
-import com.example.rickandmortyapplication.ui.theme.TextSecondary
 import com.example.rickandmortyapplication.ui.theme.statusColorForApiLabel
 
 @Composable
@@ -62,49 +57,32 @@ fun CharacterCard(
         label = "pressScale"
     )
     val statusColor = statusColorForApiLabel(status)
-    val cardShape = RoundedCornerShape(16.dp)
+    val cardShape = RoundedCornerShape(20.dp)
 
     Card(
         modifier = modifier
             .scale(scale)
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        PortalGreen.copy(alpha = 0.55f),
-                        statusColor.copy(alpha = 0.35f)
-                    )
-                ),
-                shape = cardShape
-            )
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), cardShape)
             .shadow(
-                elevation = 10.dp,
+                elevation = 12.dp,
                 shape = cardShape,
-                ambientColor = PortalGreen.copy(alpha = 0.2f),
-                spotColor = PortalGreen.copy(alpha = 0.35f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             ),
         onClick = onClick,
         interactionSource = interaction,
         shape = cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = SurfaceCard
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 1.dp
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp
         )
     ) {
         Row(
             modifier = Modifier
-                .background(
-                    brush = Brush.horizontalGradient(
-                        listOf(
-                            statusColor.copy(alpha = 0.12f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -113,12 +91,12 @@ fun CharacterCard(
                 contentDescription = name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(88.dp)
-                    .clip(CardImageShape)
+                    .size(84.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .border(
-                        width = 1.5.dp,
-                        brush = PortalEdgeGradient,
-                        shape = CardImageShape
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(16.dp)
                     )
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -129,14 +107,14 @@ fun CharacterCard(
                 Text(
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = species,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -157,20 +135,17 @@ private fun StatusChip(
         "dead" -> "Dead"
         else -> status
     }
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        color = color,
-        modifier = modifier
-            .background(
-                color = color.copy(alpha = 0.18f),
-                shape = MaterialTheme.shapes.small
-            )
-            .border(
-                width = 1.dp,
-                color = color.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    )
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = color.copy(alpha = 0.14f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.35f))
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = color,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        )
+    }
 }

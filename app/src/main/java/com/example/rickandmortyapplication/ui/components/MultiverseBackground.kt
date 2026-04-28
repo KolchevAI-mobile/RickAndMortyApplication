@@ -1,9 +1,5 @@
 package com.example.rickandmortyapplication.ui.components
 
-import com.example.rickandmortyapplication.ui.theme.NeonCyan
-import com.example.rickandmortyapplication.ui.theme.PlasmaPink
-import com.example.rickandmortyapplication.ui.theme.PortalGreen
-import com.example.rickandmortyapplication.ui.theme.ScreenBackgroundGradient
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,18 +20,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.rickandmortyapplication.ui.theme.ScreenBackgroundGradient
 
 @Composable
 fun MultiverseBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val transition = rememberInfiniteTransition(label = "portalPulse")
+    val transition = rememberInfiniteTransition(label = "ambientPulse")
     val pulse by transition.animateFloat(
-        initialValue = 0.85f,
+        initialValue = 0.7f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2_200, easing = LinearEasing),
+            animation = tween(4_200, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulse"
@@ -53,34 +50,34 @@ fun MultiverseBackground(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .blur(120.dp)
+                .blur(92.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            PortalGreen.copy(alpha = 0.12f * pulse),
+                            Color(0xFF7AA2FF).copy(alpha = 0.12f * pulse),
                             Color.Transparent
                         ),
-                        center = Offset(wf * 0.2f, hf * 0.12f),
-                        radius = maxOf(wf, hf) * 0.55f
+                        center = Offset(wf * 0.1f, hf * 0.1f),
+                        radius = maxOf(wf, hf) * 0.6f
                     )
                 )
         )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .blur(100.dp)
+                .blur(120.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            PlasmaPink.copy(alpha = 0.08f * pulse),
+                            Color(0xFFB58CFF).copy(alpha = 0.11f * pulse),
                             Color.Transparent
                         ),
-                        center = Offset(wf * 0.88f, hf * 0.22f),
-                        radius = maxOf(wf, hf) * 0.45f
+                        center = Offset(wf * 0.86f, hf * 0.2f),
+                        radius = maxOf(wf, hf) * 0.5f
                     )
                 )
         )
-        val strokeAlpha = 0.15f + 0.1f * pulse
+        val strokeAlpha = 0.08f + 0.06f * pulse
         Canvas(modifier = Modifier.fillMaxSize()) {
             val sw = size.width
             val sh = size.height
@@ -88,16 +85,16 @@ fun MultiverseBackground(
                 brush = Brush.linearGradient(
                     listOf(
                         Color.Transparent,
-                        PortalGreen.copy(alpha = strokeAlpha),
-                        NeonCyan.copy(alpha = strokeAlpha * 0.6f),
+                        Color(0xFF9FB8FF).copy(alpha = strokeAlpha),
+                        Color(0xFF94A8D6).copy(alpha = strokeAlpha * 0.7f),
                         Color.Transparent
                     ),
-                    start = Offset(0f, sh * 0.3f),
-                    end = Offset(sw, sh * 0.35f)
+                    start = Offset(0f, sh * 0.24f),
+                    end = Offset(sw, sh * 0.28f)
                 ),
-                start = Offset(0f, sh * 0.32f),
-                end = Offset(sw, sh * 0.32f),
-                strokeWidth = 1.2f
+                start = Offset(0f, sh * 0.26f),
+                end = Offset(sw, sh * 0.26f),
+                strokeWidth = 1f
             )
         }
         content()

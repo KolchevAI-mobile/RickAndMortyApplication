@@ -8,8 +8,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,14 +41,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.rickandmortyapplication.R
@@ -54,13 +53,6 @@ import com.example.rickandmortyapplication.ui.components.ErrorWithAnimationState
 import com.example.rickandmortyapplication.ui.components.LoadingAnimation
 import com.example.rickandmortyapplication.ui.components.MultiverseBackground
 import com.example.rickandmortyapplication.ui.state.UiState
-import com.example.rickandmortyapplication.ui.theme.CharacterDetailPhotoShape
-import com.example.rickandmortyapplication.ui.theme.NeonCyan
-import com.example.rickandmortyapplication.ui.theme.PortalEdgeGradient
-import com.example.rickandmortyapplication.ui.theme.PortalGreen
-import com.example.rickandmortyapplication.ui.theme.SurfaceCard
-import com.example.rickandmortyapplication.ui.theme.TextPrimary
-import com.example.rickandmortyapplication.ui.theme.TitleGradient
 import com.example.rickandmortyapplication.ui.theme.statusColorForApiLabel
 
 @Composable
@@ -117,26 +109,24 @@ private fun CharacterDetailContent(
     onBackClick: () -> Unit
 ) {
     val scroll = rememberScrollState()
-    val statusC = statusColorForApiLabel(character.status)
+    val statusColor = statusColorForApiLabel(character.status)
 
     Box(Modifier.fillMaxSize()) {
-        DetailPortalAtmosphere(Modifier.fillMaxSize())
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scroll)
+                .padding(horizontal = 16.dp)
         ) {
-            Box(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .aspectRatio(1f)
-                    .shadow(
-                        elevation = 20.dp,
-                        shape = CharacterDetailPhotoShape,
-                        spotColor = PortalGreen.copy(alpha = 0.4f),
-                        ambientColor = NeonCyan.copy(alpha = 0.2f)
-                    )
+                    .statusBarsPadding()
+                    .padding(top = 12.dp)
+                    .aspectRatio(1.05f),
+                shape = RoundedCornerShape(28.dp),
+                shadowElevation = 14.dp,
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Box(Modifier.fillMaxSize()) {
                     AsyncImage(
@@ -146,93 +136,126 @@ private fun CharacterDetailContent(
                         alignment = Alignment.TopCenter,
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(CharacterDetailPhotoShape)
+                            .clip(RoundedCornerShape(28.dp))
                     )
-                    // Лёгкий виньет: темнее внизу, лицо сверху не глушим
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
                                 brush = Brush.verticalGradient(
-                                    listOf(
-                                        Color(0x00000000),
-                                        Color(0x220A0C12),
-                                        Color(0x550A1018)
-                                    )
+                                    listOf(Color.Transparent, Color(0xB20B0D14))
                                 )
                             )
                     )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(
-                            border = BorderStroke(1.5.dp, PortalEdgeGradient),
-                            shape = CharacterDetailPhotoShape
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = character.name,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold
                         )
-                )
+                        Spacer(Modifier.height(8.dp))
+                        StatusBadge(character.status, statusColor)
+                    }
+                }
             }
-            Column(
+
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 16.dp, bottom = 32.dp)
-                    .navigationBarsPadding()
+                    .padding(top = 14.dp)
+                    .navigationBarsPadding(),
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp
             ) {
-                Text(
-                    text = character.name,
-                    style = characterNameTextStyle()
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = character.status,
-                    color = statusC,
-                    style = MaterialTheme.typography.labelLarge
-                )
-                Spacer(Modifier.height(20.dp))
-                InfoPanel {
-                    val typeLine = character.type.trim().ifEmpty { "—" }
-                    DetailInfoRow(
-                        stringResource(R.string.character_species, character.species)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.list_header_tagline),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (typeLine != "—") {
-                        Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(12.dp))
+                    MetadataRow(character = character)
+                    Spacer(Modifier.height(14.dp))
+                    InfoPanel {
                         DetailInfoRow(
-                            stringResource(R.string.character_type, typeLine)
+                            title = stringResource(R.string.character_origin, ""),
+                            value = character.originName.ifEmpty { "Unknown origin" }
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        DetailInfoRow(
+                            title = stringResource(R.string.character_location, ""),
+                            value = character.locationName.ifEmpty { "Unknown location" }
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
-                    DetailInfoRow(
-                        stringResource(
-                            R.string.character_gender,
-                            character.gender.ifEmpty { "—" }
-                        )
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    DetailInfoRow(
-                        stringResource(
-                            R.string.character_origin,
-                            character.originName.ifEmpty { "—" }
-                        )
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    DetailInfoRow(
-                        stringResource(
-                            R.string.character_location,
-                            character.locationName.ifEmpty { "—" }
-                        )
-                    )
                 }
             }
+            Spacer(Modifier.height(20.dp))
         }
         TopBackButton(onBack = onBackClick)
     }
 }
 
 @Composable
-private fun TopBackButton(
-    onBack: () -> Unit
-) {
+private fun StatusBadge(status: String, statusColor: Color) {
+    Surface(
+        shape = CircleShape,
+        color = statusColor.copy(alpha = 0.2f),
+        border = BorderStroke(1.dp, statusColor.copy(alpha = 0.5f))
+    ) {
+        Text(
+            text = status,
+            color = statusColor,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun MetadataRow(character: Character) {
+    val typeValue = character.type.trim().ifEmpty { "Unknown type" }
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        MetaPill(title = "Species", value = character.species)
+        MetaPill(title = "Type", value = typeValue)
+        MetaPill(title = "Gender", value = character.gender.ifEmpty { "Unknown" })
+    }
+}
+
+@Composable
+private fun MetaPill(title: String, value: String) {
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopBackButton(onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -243,18 +266,13 @@ private fun TopBackButton(
             onClick = onBack,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .shadow(
-                    8.dp,
-                    CircleShape,
-                    ambientColor = PortalGreen,
-                    spotColor = PortalGreen
-                )
-                .background(Color(0xCC1A1F2E), CircleShape)
+                .shadow(8.dp, CircleShape)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.82f), CircleShape)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(R.string.back),
-                tint = NeonCyan
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -264,17 +282,16 @@ private fun TopBackButton(
 private fun InfoPanel(
     content: @Composable () -> Unit
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(18.dp)
     Surface(
         shape = shape,
-        color = SurfaceCard,
-        shadowElevation = 8.dp
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, PortalGreen.copy(alpha = 0.45f), shape)
-                .padding(18.dp)
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f), shape)
+                .padding(14.dp)
         ) {
             content()
         }
@@ -283,23 +300,19 @@ private fun InfoPanel(
 
 @Composable
 private fun DetailInfoRow(
-    line: String
+    title: String,
+    value: String
 ) {
-    Text(
-        text = line,
-        style = MaterialTheme.typography.bodyLarge,
-        color = TextPrimary
-    )
+    Column {
+        Text(
+            text = title.trimEnd(':').trim(),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
-
-private fun characterNameTextStyle() = TextStyle(
-    fontSize = 30.sp,
-    lineHeight = 36.sp,
-    fontWeight = FontWeight.Black,
-    brush = TitleGradient,
-    shadow = Shadow(
-        color = Color(0xE6000000),
-        offset = Offset(0f, 2.5f),
-        blurRadius = 14f
-    )
-)
