@@ -6,6 +6,8 @@ import com.example.rickandmortyapplication.data.mapper.ApiCharacterFilter
 import com.example.rickandmortyapplication.data.mapper.toCharacter
 import com.example.rickandmortyapplication.data.mapper.toCharacterEntity
 import com.example.rickandmortyapplication.data.remote.RickAndMortyApi
+import com.example.rickandmortyapplication.data.remote.loadCharacterPage
+import com.example.rickandmortyapplication.data.remote.pageKeys
 import com.example.rickandmortyapplication.domain.model.Character
 import retrofit2.HttpException
 import java.io.IOException
@@ -17,42 +19,34 @@ class NetworkCharacterPagingSource(
     private val filter: ApiCharacterFilter
 ) : PagingSource<Int, Character>() {
 
-    override suspend fun load(
-        params: PagingSource.LoadParams<Int>
-    ): LoadResult<Int, Character> = try {
-        val page = params.key ?: 1
-        val response = api.getAllCharacters(
-            page = page,
-            name = query.ifBlank { null },
-            status = filter.status,
-            gender = filter.gender
-        )
-        val characters = response.results.map { dto ->
-            dto.toCharacterEntity().toCharacter()
-        }
-        val nextKey = if (response.info.next == null) null else page + 1
-        val prevKey = if (page == 1) null else page - 1
-        LoadResult.Page(
-            data = characters,
-            prevKey = prevKey,
-            nextKey = nextKey
-        )
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: HttpException) {
-        if (e.code() == 404) {
-            LoadResult.Page(
-                data = emptyList(),
-                prevKey = null,
-                nextKey = null
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Character> {
+        return try {
+            val page = params.key ?: 1
+            val response = api.loadCharacterPage(
+                page = page,
+                name = query.ifBlank { null },
+                status = filter.status,
+                gender = filter.gender
             )
-        } else {
+            val characters = response.results.map { dto ->
+                dto.toCharacterEntity().toCharacter()
+            }
+            val endOfPagination = response.info.next == null
+            val (prevKey, nextKey) = pageKeys(page, hasNextPage = !endOfPagination)
+            LoadResult.Page(
+                data = characters,
+                prevKey = prevKey,
+                nextKey = nextKey
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            PagingLoadResultFactory.fromThrowable(e)
+        } catch (e: HttpException) {
+            PagingLoadResultFactory.fromThrowable(e)
+        } catch (e: Throwable) {
             PagingLoadResultFactory.fromThrowable(e)
         }
-    } catch (e: IOException) {
-        PagingLoadResultFactory.fromThrowable(e)
-    } catch (e: Throwable) {
-        PagingLoadResultFactory.fromThrowable(e)
     }
 
     override fun getRefreshKey(state: PagingState<Int, Character>): Int? {

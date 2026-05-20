@@ -4,6 +4,8 @@
     <string name="filters">Фильтры</string>
     <string name="search_empty">Ничего не найдено</string>
     <string name="load_characters_error">Не удалось загрузить персонажей</string>
+    <string name="load_more_error">Не удалось подгрузить следующую страницу</string>
+    <string name="error_server">Сервер временно недоступен. Попробуйте позже.</string>
     <string name="load_character_error">Не удалось загрузить персонажа</string>
     <string name="error_network">Проблема с сетью. Проверьте подключение.</string>
     <string name="error_character_not_found">Персонаж не найден</string>

@@ -19,5 +19,4 @@ val CardImageShape = RoundedCornerShape(
     bottomEnd = 4.dp
 )
 
-/** Ровная рамка фото на экране деталей — не режет портрет по диагонали. */
 val CharacterDetailPhotoShape = RoundedCornerShape(26.dp)

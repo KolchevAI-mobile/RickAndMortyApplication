@@ -1,6 +1,7 @@
 package com.example.rickandmortyapplication.di
 
 import com.example.rickandmortyapplication.BuildConfig
+import com.example.rickandmortyapplication.data.network.RetryInterceptor
 import com.example.rickandmortyapplication.data.remote.RickAndMortyApi
 import dagger.Module
 import dagger.Provides
@@ -27,6 +28,7 @@ object NetworkModule {
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
+            .addInterceptor(RetryInterceptor())
             .apply {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(HttpLoggingInterceptor().apply {

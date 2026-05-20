@@ -3,7 +3,6 @@ package com.example.rickandmortyapplication.ui.characterlist
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
@@ -27,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -60,6 +59,8 @@ import com.example.rickandmortyapplication.ui.components.CharacterCard
 import com.example.rickandmortyapplication.ui.components.ErrorWithAnimationState
 import com.example.rickandmortyapplication.ui.components.LoadingAnimation
 import com.example.rickandmortyapplication.ui.components.MultiverseBackground
+import com.example.rickandmortyapplication.ui.components.PagingAppendErrorFooter
+import com.example.rickandmortyapplication.ui.components.PagingAppendLoadingFooter
 import androidx.compose.ui.res.stringResource
 
 @Composable
@@ -79,10 +80,15 @@ fun CharacterListScreen(
     onCharacterClick: (Int) -> Unit
 ) {
     val characters = viewModel.characterPagingFlow.collectAsLazyPagingItems()
-    val loadState = characters.loadState
+    val refreshState = characters.loadState.refresh
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filters by viewModel.filters.collectAsState()
     var isFilterSheetOpen by remember { mutableStateOf(false) }
+
+    val showInitialLoading = refreshState is LoadState.Loading && characters.itemCount == 0
+    val showInitialError = refreshState is LoadState.Error && characters.itemCount == 0
+    val showEmpty = refreshState is LoadState.NotLoading && characters.itemCount == 0
+    val showList = !showInitialLoading && !showInitialError && !showEmpty
 
     MultiverseBackground {
         Column(
@@ -112,6 +118,13 @@ fun CharacterListScreen(
                 }
             }
 
+            if (refreshState is LoadState.Loading && characters.itemCount > 0) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
             if (isFilterSheetOpen) {
                 CharacterFilterBottomSheet(
                     currentFilters = filters,
@@ -124,29 +137,19 @@ fun CharacterListScreen(
             }
 
             when {
-                loadState.refresh is LoadState.Loading -> {
-                    LoadingAnimation()
-                }
-                loadState.refresh is LoadState.Error -> {
-                    val error = loadState.refresh as LoadState.Error
+                showInitialLoading -> LoadingAnimation()
+                showInitialError -> {
+                    val error = refreshState
                     ErrorWithAnimationState(
-                        message = error.error.localizedMessage
-                            ?: stringResource(R.string.load_characters_error),
+                        message = pagingErrorMessage(error.error),
                         onRetry = { characters.retry() }
                     )
                 }
-                else -> {
-                    if (loadState.refresh is LoadState.NotLoading &&
-                        characters.itemCount == 0
-                    ) {
-                        EmptyMultiverseState()
-                    } else {
-                        CharacterListContent(
-                            characters = characters,
-                            onCharacterClick = onCharacterClick
-                        )
-                    }
-                }
+                showEmpty -> EmptyMultiverseState()
+                true -> CharacterListContent(
+                    characters = characters,
+                    onCharacterClick = onCharacterClick
+                )
             }
         }
     }
@@ -310,6 +313,8 @@ fun CharacterListContent(
     characters: LazyPagingItems<Character>,
     onCharacterClick: (Int) -> Unit
 ) {
+    val appendState = characters.loadState.append
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -333,6 +338,24 @@ fun CharacterListContent(
                     onClick = { onCharacterClick(character.id) }
                 )
             }
+        }
+
+        when (appendState) {
+            is LoadState.Loading -> {
+                item(key = "append_loading") {
+                    PagingAppendLoadingFooter()
+                }
+            }
+            is LoadState.Error -> {
+                item(key = "append_error") {
+                    val error = appendState
+                    PagingAppendErrorFooter(
+                        message = pagingErrorMessage(error.error),
+                        onRetry = { characters.retry() }
+                    )
+                }
+            }
+            else -> Unit
         }
     }
 }

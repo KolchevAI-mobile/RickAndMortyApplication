@@ -11,12 +11,19 @@ import com.example.rickandmortyapplication.data.local.entity.RemoteKeysEntity
 import com.example.rickandmortyapplication.data.mapper.toCharacterEntity
 import retrofit2.HttpException
 import java.io.IOException
-
 @OptIn(ExperimentalPagingApi::class)
 class CharacterRemoteMediator(
     private val database: AppDatabase,
     private val api: RickAndMortyApi
 ) : RemoteMediator<Int, CharacterEntity>() {
+
+    override suspend fun initialize(): InitializeAction {
+        return if (database.characterDao().count() > 0) {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        } else {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
+    }
 
     override suspend fun load(
         loadType: LoadType,
@@ -24,10 +31,7 @@ class CharacterRemoteMediator(
     ): MediatorResult {
         return try {
             val page = when (loadType) {
-                LoadType.REFRESH -> {
-                    val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-                    remoteKeys?.nextKey?.minus(1) ?: 1
-                }
+                LoadType.REFRESH -> FIRST_PAGE
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
                     val remoteKeys = getRemoteKeyForLastItem(state)
@@ -37,8 +41,7 @@ class CharacterRemoteMediator(
                 }
             }
 
-            val response = api.getAllCharacters(page = page)
-
+            val response = api.loadCharacterPage(page = page)
             val endOfPaginationReached = response.info.next == null
 
             database.withTransaction {
@@ -47,8 +50,7 @@ class CharacterRemoteMediator(
                     database.characterDao().clearAll()
                 }
 
-                val prevKey = if (page == 1) null else page - 1
-                val nextKey = if (endOfPaginationReached) null else page + 1
+                val (prevKey, nextKey) = pageKeys(page, hasNextPage = !endOfPaginationReached)
 
                 val remoteKeys = response.results.map { dto ->
                     RemoteKeysEntity(
@@ -58,9 +60,7 @@ class CharacterRemoteMediator(
                     )
                 }
                 database.remoteKeysDao().insertAll(remoteKeys)
-
-                val characters = response.results.map { it.toCharacterEntity() }
-                database.characterDao().insertAll(characters)
+                database.characterDao().insertAll(response.results.map { it.toCharacterEntity() })
             }
 
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
@@ -76,9 +76,7 @@ class CharacterRemoteMediator(
             ?.let { character -> database.remoteKeysDao().getRemoteKeys(character.id) }
     }
 
-    private suspend fun getRemoteKeyClosestToCurrentPosition(state: PagingState<Int, CharacterEntity>): RemoteKeysEntity? {
-        return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.id?.let { id -> database.remoteKeysDao().getRemoteKeys(id) }
-        }
+    private companion object {
+        const val FIRST_PAGE = 1
     }
 }

@@ -2,13 +2,13 @@ package com.example.rickandmortyapplication.data.repository
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.rickandmortyapplication.data.local.AppDatabase
 import com.example.rickandmortyapplication.data.mapper.toApiQuery
 import com.example.rickandmortyapplication.data.mapper.toCharacter
 import com.example.rickandmortyapplication.data.mapper.toCharacterEntity
+import com.example.rickandmortyapplication.data.paging.CharacterPagingConfig
 import com.example.rickandmortyapplication.data.paging.NetworkCharacterPagingSource
 import com.example.rickandmortyapplication.data.remote.CharacterRemoteMediator
 import com.example.rickandmortyapplication.data.remote.RickAndMortyApi
@@ -32,12 +32,7 @@ class CharacterRepositoryImpl @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     override fun observeCachedLocalWithRemote(): Flow<PagingData<Character>> {
         return Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                initialLoadSize = 40,
-                prefetchDistance = 15,
-                enablePlaceholders = false
-            ),
+            config = CharacterPagingConfig.default,
             remoteMediator = CharacterRemoteMediator(database, api),
             pagingSourceFactory = { database.characterDao().getPagingSource() }
         ).flow.map { pagingData ->
@@ -51,12 +46,7 @@ class CharacterRepositoryImpl @Inject constructor(
     ): Flow<PagingData<Character>> {
         val apiFilter = filters.toApiQuery()
         return Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                initialLoadSize = 40,
-                prefetchDistance = 15,
-                enablePlaceholders = false
-            ),
+            config = CharacterPagingConfig.default,
             pagingSourceFactory = {
                 NetworkCharacterPagingSource(api, query, apiFilter)
             }
@@ -69,7 +59,9 @@ class CharacterRepositoryImpl @Inject constructor(
         }
         return try {
             val dto = api.getCharacterById(id)
-            GetCharacterByIdResult.Success(dto.toCharacterEntity().toCharacter())
+            val entity = dto.toCharacterEntity()
+            database.characterDao().insertAll(listOf(entity))
+            GetCharacterByIdResult.Success(entity.toCharacter())
         } catch (e: CancellationException) {
             throw e
         } catch (e: HttpException) {
