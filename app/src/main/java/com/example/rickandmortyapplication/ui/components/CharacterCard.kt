@@ -3,6 +3,7 @@ package com.example.rickandmortyapplication.ui.components
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -11,25 +12,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +48,7 @@ fun CharacterCard(
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (pressed) 0.97f else 1f,
+        targetValue = if (pressed) 0.98f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -58,18 +57,15 @@ fun CharacterCard(
     )
     val statusColor = statusColorForApiLabel(status)
     val cardShape = RoundedCornerShape(20.dp)
+    val imageShape = RoundedCornerShape(16.dp)
 
     Card(
         modifier = modifier
-            .scale(scale)
             .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), cardShape)
-            .shadow(
-                elevation = 12.dp,
-                shape = cardShape,
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-            ),
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
         onClick = onClick,
         interactionSource = interaction,
         shape = cardShape,
@@ -77,13 +73,13 @@ fun CharacterCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 0.dp
-        )
+            defaultElevation = 2.dp,
+            pressedElevation = 6.dp
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.18f))
     ) {
         Row(
-            modifier = Modifier
-                .padding(14.dp),
+            modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -92,11 +88,11 @@ fun CharacterCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(84.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(imageShape)
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(16.dp)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                        shape = imageShape
                     )
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -139,7 +135,7 @@ private fun StatusChip(
         modifier = modifier,
         shape = CircleShape,
         color = color.copy(alpha = 0.14f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.35f))
+        border = BorderStroke(1.dp, color.copy(alpha = 0.35f))
     ) {
         Text(
             text = label,

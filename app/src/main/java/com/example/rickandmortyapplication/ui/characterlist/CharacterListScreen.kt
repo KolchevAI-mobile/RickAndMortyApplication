@@ -1,8 +1,9 @@
 package com.example.rickandmortyapplication.ui.characterlist
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -39,8 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -61,7 +62,9 @@ import com.example.rickandmortyapplication.ui.components.LoadingAnimation
 import com.example.rickandmortyapplication.ui.components.MultiverseBackground
 import com.example.rickandmortyapplication.ui.components.PagingAppendErrorFooter
 import com.example.rickandmortyapplication.ui.components.PagingAppendLoadingFooter
-import androidx.compose.ui.res.stringResource
+import com.example.rickandmortyapplication.ui.theme.PortalGreen
+
+private val SearchRowHeight = 52.dp
 
 @Composable
 fun CharacterListRoute(
@@ -85,10 +88,11 @@ fun CharacterListScreen(
     val filters by viewModel.filters.collectAsState()
     var isFilterSheetOpen by remember { mutableStateOf(false) }
 
+    val filtersActive = filters.status != null || filters.gender != null
+    val isRefreshing = refreshState is LoadState.Loading && characters.itemCount > 0
     val showInitialLoading = refreshState is LoadState.Loading && characters.itemCount == 0
     val showInitialError = refreshState is LoadState.Error && characters.itemCount == 0
     val showEmpty = refreshState is LoadState.NotLoading && characters.itemCount == 0
-    val showList = !showInitialLoading && !showInitialError && !showEmpty
 
     MultiverseBackground {
         Column(
@@ -96,59 +100,89 @@ fun CharacterListScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            Surface(
+            ListHeaderCard(
+                itemCount = characters.itemCount,
+                searchQuery = searchQuery,
+                filtersActive = filtersActive,
+                isRefreshing = isRefreshing,
+                onSearchChange = viewModel::onSearchQueryChange,
+                onFilterClick = { isFilterSheetOpen = true }
+            )
+
+            Box(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                shape = RoundedCornerShape(24.dp),
-                tonalElevation = 2.dp,
-                shadowElevation = 6.dp,
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-                ) {
-                    BrandedHeader(itemCount = characters.itemCount)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    SearchAndFiltersRow(
-                        searchQuery = searchQuery,
-                        onSearchChange = viewModel::onSearchQueryChange,
-                        onFilterClick = { isFilterSheetOpen = true }
+                when {
+                    showInitialLoading -> LoadingAnimation(Modifier.fillMaxSize())
+                    showInitialError -> {
+                        val error = refreshState as LoadState.Error
+                        ErrorWithAnimationState(
+                            message = pagingErrorMessage(error.error),
+                            onRetry = { characters.retry() }
+                        )
+                    }
+                    showEmpty -> EmptyMultiverseState(Modifier.fillMaxSize())
+                    else -> CharacterListContent(
+                        characters = characters,
+                        onCharacterClick = onCharacterClick
                     )
                 }
             }
+        }
 
-            if (refreshState is LoadState.Loading && characters.itemCount > 0) {
+        if (isFilterSheetOpen) {
+            CharacterFilterBottomSheet(
+                currentFilters = filters,
+                onApply = { newFilters ->
+                    viewModel.onFilterChange(newFilters)
+                    isFilterSheetOpen = false
+                },
+                onDismiss = { isFilterSheetOpen = false }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListHeaderCard(
+    itemCount: Int,
+    searchQuery: String,
+    filtersActive: Boolean,
+    isRefreshing: Boolean,
+    onSearchChange: (String) -> Unit,
+    onFilterClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        shape = RoundedCornerShape(24.dp),
+        tonalElevation = 2.dp,
+        shadowElevation = 6.dp,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+    ) {
+        Column {
+            Column(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+            ) {
+                BrandedHeader(itemCount = itemCount)
+                Spacer(modifier = Modifier.height(12.dp))
+                SearchAndFiltersRow(
+                    searchQuery = searchQuery,
+                    filtersActive = filtersActive,
+                    onSearchChange = onSearchChange,
+                    onFilterClick = onFilterClick
+                )
+            }
+            AnimatedVisibility(visible = isRefreshing) {
                 LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            if (isFilterSheetOpen) {
-                CharacterFilterBottomSheet(
-                    currentFilters = filters,
-                    onApply = { newFilters ->
-                        viewModel.onFilterChange(newFilters)
-                        isFilterSheetOpen = false
-                    },
-                    onDismiss = { isFilterSheetOpen = false }
-                )
-            }
-
-            when {
-                showInitialLoading -> LoadingAnimation()
-                showInitialError -> {
-                    val error = refreshState
-                    ErrorWithAnimationState(
-                        message = pagingErrorMessage(error.error),
-                        onRetry = { characters.retry() }
-                    )
-                }
-                showEmpty -> EmptyMultiverseState()
-                true -> CharacterListContent(
-                    characters = characters,
-                    onCharacterClick = onCharacterClick
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
+                    color = PortalGreen,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
                 )
             }
         }
@@ -157,16 +191,18 @@ fun CharacterListScreen(
 
 @Composable
 private fun BrandedHeader(itemCount: Int) {
-    val title = stringResource(R.string.app_name).replace("Application", "").trim()
-    val subtitle = "Character Directory"
+    val title = stringResource(R.string.list_header_title)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             Text(
-                text = subtitle.uppercase(),
+                text = stringResource(R.string.list_header_subtitle).uppercase(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -184,15 +220,16 @@ private fun BrandedHeader(itemCount: Int) {
                 }
             )
         }
+        Spacer(Modifier.width(12.dp))
         Surface(
             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "$itemCount",
-                style = MaterialTheme.typography.titleMedium,
+                text = stringResource(R.string.loaded_count, itemCount),
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
             )
         }
     }
@@ -201,6 +238,7 @@ private fun BrandedHeader(itemCount: Int) {
 @Composable
 private fun SearchAndFiltersRow(
     searchQuery: String,
+    filtersActive: Boolean,
     onSearchChange: (String) -> Unit,
     onFilterClick: () -> Unit
 ) {
@@ -213,7 +251,7 @@ private fun SearchAndFiltersRow(
             onValueChange = onSearchChange,
             modifier = Modifier
                 .weight(1f)
-                .heightIn(min = 40.dp, max = 50.dp),
+                .height(SearchRowHeight),
             placeholder = {
                 Text(
                     stringResource(R.string.search_placeholder),
@@ -227,16 +265,21 @@ private fun SearchAndFiltersRow(
                 Icon(
                     Icons.Rounded.Search,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
                 )
             },
             trailingIcon = {
                 AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onSearchChange("") }) {
+                    IconButton(
+                        onClick = { onSearchChange("") },
+                        modifier = Modifier.size(36.dp)
+                    ) {
                         Icon(
                             Icons.Rounded.Close,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentDescription = stringResource(R.string.cancel),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -253,11 +296,20 @@ private fun SearchAndFiltersRow(
         )
         Button(
             onClick = onFilterClick,
-            modifier = Modifier.heightIn(max = 48.dp),
+            modifier = Modifier.height(SearchRowHeight),
             shape = RoundedCornerShape(14.dp),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            border = if (filtersActive) {
+                BorderStroke(1.5.dp, PortalGreen.copy(alpha = 0.7f))
+            } else {
+                null
+            },
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = if (filtersActive) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primaryContainer
+                },
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
             elevation = ButtonDefaults.buttonElevation(
@@ -277,12 +329,10 @@ private fun SearchAndFiltersRow(
 }
 
 @Composable
-private fun EmptyMultiverseState() {
+private fun EmptyMultiverseState(modifier: Modifier = Modifier) {
     val haloColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -316,11 +366,13 @@ fun CharacterListContent(
     val appendState = characters.loadState.append
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .background(Color.Transparent),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 8.dp,
+            bottom = 28.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(
@@ -348,9 +400,8 @@ fun CharacterListContent(
             }
             is LoadState.Error -> {
                 item(key = "append_error") {
-                    val error = appendState
                     PagingAppendErrorFooter(
-                        message = pagingErrorMessage(error.error),
+                        message = pagingErrorMessage(appendState.error),
                         onRetry = { characters.retry() }
                     )
                 }

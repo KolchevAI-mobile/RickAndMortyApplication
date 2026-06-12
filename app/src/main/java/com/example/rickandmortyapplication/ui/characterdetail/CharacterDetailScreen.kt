@@ -38,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -76,16 +75,17 @@ fun CharacterDetailScreen(
     MultiverseBackground {
         AnimatedContent(
             targetState = state,
+            modifier = Modifier.fillMaxSize(),
             transitionSpec = {
                 (
                     fadeIn(spring(dampingRatio = 0.88f, stiffness = 200f)) togetherWith
                         fadeOut(spring(dampingRatio = 0.88f, stiffness = 200f))
-                )
+                    )
             },
             label = "detailState"
         ) { st ->
             when (st) {
-                UiState.Loading -> LoadingAnimation()
+                UiState.Loading -> LoadingAnimation(Modifier.fillMaxSize())
                 is UiState.Error -> {
                     ErrorWithAnimationState(
                         message = getCharacterErrorString(st.error),
@@ -110,6 +110,7 @@ private fun CharacterDetailContent(
 ) {
     val scroll = rememberScrollState()
     val statusColor = statusColorForApiLabel(character.status)
+    val heroShape = RoundedCornerShape(28.dp)
 
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -117,14 +118,15 @@ private fun CharacterDetailContent(
                 .fillMaxSize()
                 .verticalScroll(scroll)
                 .padding(horizontal = 16.dp)
+                .navigationBarsPadding()
         ) {
+            Spacer(Modifier.statusBarsPadding())
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(top = 12.dp)
+                    .padding(top = 48.dp)
                     .aspectRatio(1.05f),
-                shape = RoundedCornerShape(28.dp),
+                shape = heroShape,
                 shadowElevation = 14.dp,
                 color = MaterialTheme.colorScheme.surface
             ) {
@@ -136,7 +138,7 @@ private fun CharacterDetailContent(
                         alignment = Alignment.TopCenter,
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(28.dp))
+                            .clip(heroShape)
                     )
                     Box(
                         modifier = Modifier
@@ -167,8 +169,7 @@ private fun CharacterDetailContent(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 14.dp)
-                    .navigationBarsPadding(),
+                    .padding(top = 14.dp),
                 shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 2.dp
@@ -184,18 +185,18 @@ private fun CharacterDetailContent(
                     Spacer(Modifier.height(14.dp))
                     InfoPanel {
                         DetailInfoRow(
-                            title = stringResource(R.string.character_origin, ""),
-                            value = character.originName.ifEmpty { "Unknown origin" }
+                            title = stringResource(R.string.character_origin_label),
+                            value = character.originName.ifEmpty { "—" }
                         )
                         Spacer(Modifier.height(10.dp))
                         DetailInfoRow(
-                            title = stringResource(R.string.character_location, ""),
-                            value = character.locationName.ifEmpty { "Unknown location" }
+                            title = stringResource(R.string.character_location_label),
+                            value = character.locationName.ifEmpty { "—" }
                         )
                     }
                 }
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
         }
         TopBackButton(onBack = onBackClick)
     }
@@ -220,14 +221,14 @@ private fun StatusBadge(status: String, statusColor: Color) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MetadataRow(character: Character) {
-    val typeValue = character.type.trim().ifEmpty { "Unknown type" }
+    val typeValue = character.type.trim().ifEmpty { "—" }
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        MetaPill(title = "Species", value = character.species)
-        MetaPill(title = "Type", value = typeValue)
-        MetaPill(title = "Gender", value = character.gender.ifEmpty { "Unknown" })
+        MetaPill(title = stringResource(R.string.character_species_label), value = character.species)
+        MetaPill(title = stringResource(R.string.character_type_label), value = typeValue)
+        MetaPill(title = stringResource(R.string.character_gender_label), value = character.gender.ifEmpty { "—" })
     }
 }
 
@@ -260,20 +261,22 @@ private fun TopBackButton(onBack: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .shadow(8.dp, CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.82f), CircleShape)
+        Surface(
+            modifier = Modifier.align(Alignment.CenterStart),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+            shadowElevation = 6.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = stringResource(R.string.back),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }
@@ -305,10 +308,11 @@ private fun DetailInfoRow(
 ) {
     Column {
         Text(
-            text = title.trimEnd(':').trim(),
+            text = title,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(Modifier.height(4.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,

@@ -24,8 +24,15 @@
     <string name="character_species">Вид: %1$s</string>
     <string name="character_type">Тип: %1$s</string>
     <string name="character_gender">Пол: %1$s</string>
+    <string name="character_species_label">Вид</string>
+    <string name="character_type_label">Тип</string>
+    <string name="character_gender_label">Пол</string>
     <string name="character_origin">Происхождение: %1$s</string>
     <string name="character_location">Локация: %1$s</string>
+    <string name="character_origin_label">Происхождение</string>
+    <string name="character_location_label">Локация</string>
+    <string name="list_header_subtitle">Каталог персонажей</string>
+    <string name="loaded_count">Загружено: %1$d</string>
     <string name="list_header_tagline">Мультивселенная</string>
     <string name="list_header_title">Персонажи</string>
     <string name="list_subtitle">Поиск в разломе измерений</string>
